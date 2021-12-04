@@ -39,7 +39,7 @@ void partTwo(const auto& inputData) {
 }
 
 int main() {
-  static constexpr auto inputFile = R"(C:\Code\aoc_2021\input\test.txt)";
+  static constexpr auto inputFile = R"(C:\Code\aoc_2021\input\day_1.txt)";
   const auto inputData = readFromFile<unsigned>(inputFile);
 
   partOne(inputData);

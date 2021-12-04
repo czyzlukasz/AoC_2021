@@ -6,3 +6,4 @@ set(CMAKE_CXX_STANDARD 20)
 set(COMMON_SOURCES Utils.cpp)
 
 add_executable(aoc_2021_day_1 day_1.cpp ${COMMON_SOURCES})
+add_executable(aoc_2021_day_2 day_2.cpp ${COMMON_SOURCES})
