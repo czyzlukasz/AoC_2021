@@ -87,13 +87,27 @@ struct Path {
   };
 
   // Check if we can enter specified node based on path history
-  bool canBeVisited(const NodeName::NodeIdType& nodeId) const {
-    if(const auto it = std::find_if(pathHistory.cbegin(), pathHistory.cend(), [&nodeId](const auto& nodeEntry) {
+  enum class VisitationStatus {
+    YES,
+    NO,
+    YES_BUT_THATS_A_SMALL_CAVE
+  };
+
+  VisitationStatus canBeVisited(const NodeName::NodeIdType& nodeId) const {
+    if(const auto it = std::find_if(pathHistory.cbegin(), pathHistory.cend(), [&nodeId, this](const auto& nodeEntry) {
       return nodeEntry.nodeVisited == nodeId;
     }); it != pathHistory.cend()) {
-      return it->canBeVisited;
+      if(it->canBeVisited) {
+        return VisitationStatus::YES;
+      }
+      const auto nodeName = NodeName::getNameByNodeId(nodeId);
+      // Magic numbers, but whatever
+      if(nodeName != "start" and nodeName != "end" and smallCaveVisited == false) {
+        return VisitationStatus::YES_BUT_THATS_A_SMALL_CAVE;
+      }
+      return VisitationStatus::NO;
     }
-    return true;
+    return VisitationStatus::YES;
   }
 
   void addNodeToPathHistory(const NodeName::NodeIdType& nodeId) {
@@ -109,7 +123,13 @@ struct Path {
       }
     }
   }
+
+  void markPathVisitedSmallCaveTwice() {
+    smallCaveVisited = true;
+  }
+
   std::vector<NodeEntry> pathHistory;
+  mutable bool smallCaveVisited{false};
 };
 
 
@@ -158,9 +178,12 @@ struct NodeStorage {
         continue;
       }
       const auto visitedNodeId = visitedNode->nodeName.nodeId;
-      if(path.canBeVisited(visitedNodeId)) {
+      if(const auto visitationStatus = path.canBeVisited(visitedNodeId); visitationStatus != Path::VisitationStatus::NO) {
         Path newPath = path;
         newPath.addNodeToPathHistory(visitedNodeId);
+        if(visitationStatus == Path::VisitationStatus::YES_BUT_THATS_A_SMALL_CAVE) {
+          newPath.markPathVisitedSmallCaveTwice();
+        }
         const auto finishedPath = walkOverPathToNode(newPath, visitedNode, finishNode);
         if(not finishedPath.empty()) {
           result.insert(result.end(), finishedPath.cbegin(), finishedPath.cend());
@@ -204,8 +227,8 @@ int main() {
 
   const auto paths = nodeStorage.findPath("start", "end");
   std::cout << "Found " << paths.size() << " possible paths:" << std::endl;
-  for(const auto& path : paths) {
-    path.printPath();
-    std::cout << std::endl;
-  }
+//  for(const auto& path : paths) {
+//    path.printPath();
+//    std::cout << std::endl;
+//  }
 }
