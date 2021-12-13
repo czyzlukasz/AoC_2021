@@ -3,7 +3,7 @@ project(aoc_2021)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(COMMON_SOURCES Utils.cpp)
+set(COMMON_SOURCES Utils.hpp)
 
 add_executable(aoc_2021_day_1 day_1.cpp ${COMMON_SOURCES})
 add_executable(aoc_2021_day_2 day_2.cpp ${COMMON_SOURCES})
@@ -17,3 +17,4 @@ add_executable(aoc_2021_day_9 day_9.cpp ${COMMON_SOURCES})
 add_executable(aoc_2021_day_10 day_10.cpp ${COMMON_SOURCES})
 add_executable(aoc_2021_day_11 day_11.cpp ${COMMON_SOURCES})
 add_executable(aoc_2021_day_12 day_12.cpp ${COMMON_SOURCES})
+add_executable(aoc_2021_day_13 day_13.cpp ${COMMON_SOURCES})

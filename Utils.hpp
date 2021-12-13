@@ -20,6 +20,16 @@ std::vector<std::tuple<Format...>> readFromFile(const std::string_view& input_fi
   return result;
 }
 
+std::vector<std::string> readLineByLine(const std::string_view& input_file, const char separator = '\n') {
+  std::vector<std::string> result;
+  std::string tempBuffer;
+  std::ifstream inputFileStream(input_file.data(), std::ios::in);
+
+  while ( std::getline( inputFileStream, tempBuffer, separator ) )
+    result.emplace_back(std::move(tempBuffer));
+  return result;
+}
+
 template<typename T>
 auto readCommaSeparatedValues(const std::string_view &filename) {
 
