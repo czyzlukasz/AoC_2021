@@ -150,13 +150,13 @@ struct Map2D {
     const auto& [xSizeMinus, ySizeMinus] = mapSizeMinus;
     switch (direction) {
       case Iterator::Direction::UP:
-        return ySizeMinus - 1;
+        return std::max(-1, ySizeMinus - 1);
       case Iterator::Direction::RIGHT:
-        return xSizePlus + 1;
+        return std::max(-1, xSizePlus + 1);
       case Iterator::Direction::DOWN:
-        return ySizePlus + 1;
+        return std::max(-1, ySizePlus + 1);
       case Iterator::Direction::LEFT:
-        return xSizeMinus - 1;
+        return std::max(-1, xSizeMinus - 1);
     }
 
     throw std::exception{};
@@ -209,7 +209,7 @@ struct Fold {
 };
 
 int main() {
-  static constexpr auto inputFile = R"(C:\Code\aoc_2021\input\test.txt)";
+  static constexpr auto inputFile = R"(C:\Code\aoc_2021\input\day_13.txt)";
   const auto inputData = readLineByLine(inputFile);
 
   Map2D map2d;
@@ -234,7 +234,7 @@ int main() {
     }
   }
 
-  map2d.fillMissingFields();
+//  map2d.fillMissingFields();
 //  std::cout << "Initial map looks like this:" << std::endl;
 //  map2d.print();
   std::cout << std::endl;
@@ -271,6 +271,7 @@ int main() {
 
     const auto foldData = generateFoldData(fold);
 
+    std::cout << "Map size is now: " << map2d.getEndOfMap(Map2D::Iterator::Direction::RIGHT) - map2d.getEndOfMap(Map2D::Iterator::Direction::LEFT) << " by " << map2d.getEndOfMap(Map2D::Iterator::Direction::DOWN) - map2d.getEndOfMap(Map2D::Iterator::Direction::UP) << std::endl;
     for(auto idx = map2d.getEndOfMap(foldData.iterationBegin) + 1; idx < map2d.getEndOfMap(foldData.iterationEnd); ++idx) {
       // Copy 'flipped' side
       const auto startFlippedPos = foldData.coordinateMaker(idx, foldData.readWritePosition);
@@ -285,13 +286,12 @@ int main() {
       std::copy(Map2D::Iterator(foldData.readDirection, startUnFlippedPos, &map2d), Map2D::Iterator(foldData.readDirection, endUnFlippedPos, &map2d), unFlippedDestinationIt);
     }
 
-    newMap.fillMissingFields();
+//    newMap.fillMissingFields();
+    newMap.groomMap();
     std::cout << "After fold I see " << newMap.countDots() << " dots here:" << std::endl;
 //    newMap.print();
     std::cout << std::endl;
     map2d = newMap;
-    // For now, break here
-    break;
   }
   map2d.groomMap();
   map2d.print();
