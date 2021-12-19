@@ -22,15 +22,15 @@ struct Node {
     }
   }
 
-  const auto& getConnectedNodes() const {
+  inline const auto& getConnectedNodes() const {
     return connectedNodes;
   }
 
-  void calculateCost(const std::function<CostType(CostType)>& costCalculator) {
+  inline void calculateCost(const std::function<CostType(CostType)>& costCalculator) {
     cost = costCalculator(cost);
   }
 
-  CostType getCost() const {
+  inline CostType getCost() const {
     return cost;
   }
 
@@ -124,11 +124,36 @@ private:
 };
 
 int main() {
-  static constexpr auto inputFile = R"(C:\Code\aoc_2021\input\day_15.txt)";
+  char x = 250u;
+  x += 50;
+  static constexpr auto extensionRate = 5;
+  static constexpr auto inputFile = R"(C:\Code\aoc_2021\input\test.txt)";
   const auto inputData = readFromFile<std::string>(inputFile);
 
+  const auto extendOriginalLine = [](const std::string& line, const auto amount) {
+    std::string result;
+    const auto calculateNextCharacter = [](const char c, const auto amount) -> char{
+      return c + amount > '9' ? c + amount - 9 : c + amount;
+    };
+
+    for(auto idx = 0; idx < extensionRate; ++idx) {
+      for(const char c : line) {
+        result.push_back(calculateNextCharacter(c, idx + amount));
+      }
+    }
+
+    return result;
+  };
+
   Map2D map2d;
-  for(const auto& [line] : inputData) {
+  std::vector<std::string> lines;
+  for(auto idx = 0; idx < extensionRate; ++idx) {
+    for (const auto& [line]: inputData) {
+      lines.push_back(extendOriginalLine(line, idx));
+    }
+  }
+
+  for(const auto& line : lines) {
     map2d.addLine(line);
   }
 
@@ -137,6 +162,8 @@ int main() {
   const auto [sizeX, sizeY] = map2d.getSize();
   const auto destinationX = sizeX - 1;
   const auto destinationY = sizeY - 1;
+
+  std::cout << "Destination: " << destinationX << ", " << destinationY << std::endl;
 
   const auto markStartNode = [&nodes](const auto x, const auto y) {
     (*std::find_if(nodes.begin(), nodes.end(), [x, y](const auto node) {
@@ -156,10 +183,15 @@ int main() {
     }))->getCost();
   };
   markStartNode(0, 0);
-  while(not reachedNode(destinationX, destinationY)) {
+  while(nodes.size() > 1) {
+    nodes.remove_if([destinationX, destinationY](const auto& nodePtr) -> bool {
+      return not nodePtr->hasUnvisitedNodes() and not (*nodePtr == Node({destinationX, destinationY}));
+    });
     nodes.sort([](const auto a, const auto b) {
       return a->getCost() < b->getCost();
     });
+    if(not (nodes.size() % 1000))
+      std::cout << nodes.size() << "\n";
     const auto it = std::find_if(nodes.begin(), nodes.end(), [](const auto& nodePtr) {
       return nodePtr->hasUnvisitedNodes();
     });
